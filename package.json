@@ -1,0 +1,83 @@
+{
+  "name": "@pixeldesigns/nexus",
+  "version": "0.2.0",
+  "description": "Local-first agent layer for tabular data. Drop any CSV, XLSX, or SQLite file — get a local MCP server your AI agent can query without your data ever leaving your machine.",
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "claude",
+    "claude-code",
+    "cursor",
+    "anthropic",
+    "local-first",
+    "agent",
+    "ai",
+    "csv",
+    "spreadsheet",
+    "sqlite",
+    "xlsx",
+    "data"
+  ],
+  "homepage": "https://github.com/scottshapiro142/nexus#readme",
+  "bugs": {
+    "url": "https://github.com/scottshapiro142/nexus/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/scottshapiro142/nexus.git"
+  },
+  "license": "MIT",
+  "author": "PixelDesigns LLC",
+  "private": false,
+  "publishConfig": {
+    "access": "public"
+  },
+  "bin": {
+    "nexus": "dist/cli/index.js"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "next dev -p 3003",
+    "build": "next build",
+    "start": "next start -p 3003",
+    "lint": "eslint",
+    "build:cli": "tsup",
+    "prepublishOnly": "npm run build:cli",
+    "env:pull": "bash scripts/pull-env.sh",
+    "eval:spec": "node --env-file=.env.local --import tsx lib/spec/eval.ts",
+    "nexus": "node --env-file=.env.local --import tsx cli/index.ts"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "better-sqlite3": "^12.10.0",
+    "commander": "^14.0.3",
+    "openai": "^6.38.0",
+    "xlsx": "^0.18.5",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.2.6",
+    "framer-motion": "^12.39.0",
+    "next": "16.2.6",
+    "react": "19.2.4",
+    "react-dom": "19.2.4",
+    "recharts": "^3.8.1",
+    "tailwindcss": "^4",
+    "tsup": "^8.5.1",
+    "tsx": "^4.22.3",
+    "typescript": "^5"
+  }
+}

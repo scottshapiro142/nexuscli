@@ -1,0 +1,61 @@
+review_id,submission_id,submission_name,submission_url,category,submitted_at,reviewed_at,agent,verdict,confidence,one_line_reason
+R001,SUB001,LoomReviewer,https://shiporSkip.app/s/SUB001,Creator Tools,2026-04-03,2026-04-04 10:14:00,Aesthete,Ship,0.91,"Beautiful idea, the demo video felt like a product I'd actually use daily."
+R002,SUB001,LoomReviewer,https://shiporSkip.app/s/SUB001,Creator Tools,2026-04-03,2026-04-04 11:02:00,Skeptic,Ship,0.78,"Crowded space, but the design-review angle is sharp enough to win a niche."
+R003,SUB001,LoomReviewer,https://shiporSkip.app/s/SUB001,Creator Tools,2026-04-03,2026-04-05 09:30:00,Engineer,Ship,0.84,Browser capture plus per-frame annotation is technically solved territory.
+R004,SUB001,LoomReviewer,https://shiporSkip.app/s/SUB001,Creator Tools,2026-04-03,2026-04-05 14:21:00,Marketer,Ship,0.88,"Every design lead I know would tweet about this, distribution is free."
+R005,SUB001,LoomReviewer,https://shiporSkip.app/s/SUB001,Creator Tools,2026-04-03,2026-04-06 08:11:00,Customer,Ship,0.83,I would pay for this on day one to stop writing essays in Figma comments.
+R006,SUB002,PantryBot,https://shiporSkip.app/s/SUB002,Consumer,2026-04-07,2026-04-08 12:00:00,Aesthete,Skip,0.66,"Generic chat UI on top of a list, nothing visually distinct."
+R007,SUB002,PantryBot,https://shiporSkip.app/s/SUB002,Consumer,2026-04-07,2026-04-08 12:48:00,Skeptic,Skip,0.89,"Grocery AI is a graveyard, household behavior change is too hard."
+R008,SUB002,PantryBot,https://shiporSkip.app/s/SUB002,Consumer,2026-04-07,2026-04-09 09:15:00,Engineer,Skip,0.71,Inventory tracking needs computer vision they have not built.
+R009,SUB002,PantryBot,https://shiporSkip.app/s/SUB002,Consumer,2026-04-07,2026-04-09 16:42:00,Marketer,Ship,0.62,"The TikTok cooking audience is huge, there is a wedge if they pick one."
+R010,SUB002,PantryBot,https://shiporSkip.app/s/SUB002,Consumer,2026-04-07,2026-04-10 10:05:00,Customer,Skip,0.74,I forgot it existed three minutes after I closed the demo.
+R011,SUB003,GameNotion,https://shiporSkip.app/s/SUB003,Productivity,2026-04-12,2026-04-13 11:30:00,Aesthete,Ship,0.79,Lovely sprite-aware tables and that pixel font choice is delightful.
+R012,SUB003,GameNotion,https://shiporSkip.app/s/SUB003,Productivity,2026-04-12,2026-04-13 13:08:00,Skeptic,Skip,0.81,Indie game devs do not pay for tools and there are only thousands of them.
+R013,SUB003,GameNotion,https://shiporSkip.app/s/SUB003,Productivity,2026-04-12,2026-04-14 08:55:00,Engineer,Ship,0.86,The asset-tracking schema is genuinely clever and would extend to film.
+R014,SUB003,GameNotion,https://shiporSkip.app/s/SUB003,Productivity,2026-04-12,2026-04-14 15:24:00,Marketer,Skip,0.69,"Niche of a niche, no obvious viral surface."
+R015,SUB003,GameNotion,https://shiporSkip.app/s/SUB003,Productivity,2026-04-12,2026-04-15 09:42:00,Customer,Ship,0.77,My friend who ships solo on itch.io said this is the first tool that gets her workflow.
+R016,SUB004,TipTap,https://shiporSkip.app/s/SUB004,Marketplace,2026-04-18,2026-04-19 10:11:00,Aesthete,Skip,0.58,Looks like every payment splash page from 2019.
+R017,SUB004,TipTap,https://shiporSkip.app/s/SUB004,Marketplace,2026-04-18,2026-04-19 14:46:00,Skeptic,Skip,0.84,Tipping economy is real but margins are thin and Stripe will eat you.
+R018,SUB004,TipTap,https://shiporSkip.app/s/SUB004,Marketplace,2026-04-18,2026-04-20 09:03:00,Engineer,Ship,0.72,Solid Stripe Connect implementation and good fraud heuristics.
+R019,SUB004,TipTap,https://shiporSkip.app/s/SUB004,Marketplace,2026-04-18,2026-04-20 13:19:00,Marketer,Ship,0.81,"Creator narrative is hot, this slots into existing demand."
+R020,SUB004,TipTap,https://shiporSkip.app/s/SUB004,Marketplace,2026-04-18,2026-04-21 08:35:00,Customer,Skip,0.65,I would not switch off Ko-fi for this.
+R021,SUB005,MusicFig,https://shiporSkip.app/s/SUB005,Creator Tools,2026-05-02,2026-05-03 11:28:00,Aesthete,Ship,0.93,"The staff rendering is a love letter to engraving, this is craft."
+R022,SUB005,MusicFig,https://shiporSkip.app/s/SUB005,Creator Tools,2026-05-02,2026-05-03 12:55:00,Skeptic,Skip,0.79,Composers who care about notation already paid for Dorico.
+R023,SUB005,MusicFig,https://shiporSkip.app/s/SUB005,Creator Tools,2026-05-02,2026-05-04 10:02:00,Engineer,Ship,0.88,Multi-cursor collaboration on a music canvas is non-trivial and they nailed it.
+R024,SUB005,MusicFig,https://shiporSkip.app/s/SUB005,Creator Tools,2026-05-02,2026-05-04 16:11:00,Marketer,Skip,0.71,Education sales cycle will crush them before product-market fit.
+R025,SUB005,MusicFig,https://shiporSkip.app/s/SUB005,Creator Tools,2026-05-02,2026-05-05 09:18:00,Customer,Ship,0.82,My college roommate the jazz composer literally gasped.
+R026,SUB006,ResumeChat,https://shiporSkip.app/s/SUB006,AI Tools,2026-05-04,2026-05-05 10:44:00,Aesthete,Skip,0.61,Stripe-clone landing page and a chat input box.
+R027,SUB006,ResumeChat,https://shiporSkip.app/s/SUB006,AI Tools,2026-05-04,2026-05-05 13:22:00,Skeptic,Skip,0.92,There are 800 of these and the moat is zero.
+R028,SUB006,ResumeChat,https://shiporSkip.app/s/SUB006,AI Tools,2026-05-04,2026-05-06 08:50:00,Engineer,Skip,0.68,Thin wrapper with no eval pipeline.
+R029,SUB006,ResumeChat,https://shiporSkip.app/s/SUB006,AI Tools,2026-05-04,2026-05-06 15:01:00,Marketer,Ship,0.70,The job-search audience is enormous and SEO is achievable.
+R030,SUB006,ResumeChat,https://shiporSkip.app/s/SUB006,AI Tools,2026-05-04,2026-05-07 09:09:00,Customer,Ship,0.64,"It rewrote my resume better than I would have, that is enough."
+R031,SUB007,VideoStack,https://shiporSkip.app/s/SUB007,Creator Tools,2026-05-06,2026-05-07 11:36:00,Aesthete,Ship,0.84,The video-first feed feels like Substack finally figured out cinema.
+R032,SUB007,VideoStack,https://shiporSkip.app/s/SUB007,Creator Tools,2026-05-06,2026-05-07 14:08:00,Skeptic,Ship,0.66,Substack will copy this in a quarter but the team can be acquired.
+R033,SUB007,VideoStack,https://shiporSkip.app/s/SUB007,Creator Tools,2026-05-06,2026-05-08 09:24:00,Engineer,Ship,0.81,Adaptive bitrate plus their transcript indexing is solid infra.
+R034,SUB007,VideoStack,https://shiporSkip.app/s/SUB007,Creator Tools,2026-05-06,2026-05-08 16:55:00,Marketer,Skip,0.73,YouTube has already won and creators do not want another inbox.
+R035,SUB007,VideoStack,https://shiporSkip.app/s/SUB007,Creator Tools,2026-05-06,2026-05-09 10:30:00,Customer,Ship,0.78,I would subscribe to three creators on this tomorrow.
+R036,SUB008,LifeLinear,https://shiporSkip.app/s/SUB008,Productivity,2026-05-09,2026-05-10 12:14:00,Aesthete,Ship,0.80,Carrying Linear's design language into personal life is genuinely fun.
+R037,SUB008,LifeLinear,https://shiporSkip.app/s/SUB008,Productivity,2026-05-09,2026-05-10 13:48:00,Skeptic,Skip,0.87,The productivity-app graveyard is the deepest one in software.
+R038,SUB008,LifeLinear,https://shiporSkip.app/s/SUB008,Productivity,2026-05-09,2026-05-11 08:20:00,Engineer,Skip,0.62,Sync conflicts in personal mode will be a support nightmare.
+R039,SUB008,LifeLinear,https://shiporSkip.app/s/SUB008,Productivity,2026-05-09,2026-05-11 15:32:00,Marketer,Ship,0.74,Power-user identity narrative is strong and will travel on X.
+R040,SUB008,LifeLinear,https://shiporSkip.app/s/SUB008,Productivity,2026-05-09,2026-05-12 09:46:00,Customer,Skip,0.69,I would use this for a week and forget my password.
+R041,SUB009,StaticVercel,https://shiporSkip.app/s/SUB009,DevTools,2026-05-10,2026-05-11 10:55:00,Aesthete,Skip,0.55,A CLI and a dashboard that looks like every Vercel competitor.
+R042,SUB009,StaticVercel,https://shiporSkip.app/s/SUB009,DevTools,2026-05-10,2026-05-11 13:17:00,Skeptic,Skip,0.91,Cloudflare Pages does this for free and is faster.
+R043,SUB009,StaticVercel,https://shiporSkip.app/s/SUB009,DevTools,2026-05-10,2026-05-12 09:08:00,Engineer,Ship,0.76,The build-cache architecture is legitimately innovative.
+R044,SUB009,StaticVercel,https://shiporSkip.app/s/SUB009,DevTools,2026-05-10,2026-05-12 16:24:00,Marketer,Skip,0.83,Devtools without a thesis just becomes Cloudflare's free tier.
+R045,SUB009,StaticVercel,https://shiporSkip.app/s/SUB009,DevTools,2026-05-10,2026-05-13 08:39:00,Customer,Skip,0.72,Why would I leave Vercel.
+R046,SUB010,DesignCursor,https://shiporSkip.app/s/SUB010,DevTools,2026-05-12,2026-05-13 11:12:00,Aesthete,Ship,0.90,"This is what every designer secretly wanted, the demo gave me chills."
+R047,SUB010,DesignCursor,https://shiporSkip.app/s/SUB010,DevTools,2026-05-12,2026-05-13 14:38:00,Skeptic,Skip,0.65,Figma will ship this themselves by EOY.
+R048,SUB010,DesignCursor,https://shiporSkip.app/s/SUB010,DevTools,2026-05-12,2026-05-14 09:50:00,Engineer,Ship,0.85,The diff-aware Figma plugin is meaningful engineering.
+R049,SUB010,DesignCursor,https://shiporSkip.app/s/SUB010,DevTools,2026-05-12,2026-05-14 15:06:00,Marketer,Ship,0.86,Designers have been waiting for their Cursor moment.
+R050,SUB010,DesignCursor,https://shiporSkip.app/s/SUB010,DevTools,2026-05-12,2026-05-15 10:21:00,Customer,Ship,0.81,My team would expense this without asking.
+R051,SUB011,SATtutor,https://shiporSkip.app/s/SUB011,AI Tools,2026-05-14,2026-05-15 11:48:00,Aesthete,Skip,0.59,Looks like a Khan Academy fan project.
+R052,SUB011,SATtutor,https://shiporSkip.app/s/SUB011,AI Tools,2026-05-14,2026-05-15 14:02:00,Skeptic,Skip,0.86,Test-prep customers are price-sensitive and churn after the test.
+R053,SUB011,SATtutor,https://shiporSkip.app/s/SUB011,AI Tools,2026-05-14,2026-05-16 09:33:00,Engineer,Ship,0.74,Adaptive item-response scoring is well implemented.
+R054,SUB011,SATtutor,https://shiporSkip.app/s/SUB011,AI Tools,2026-05-14,2026-05-16 16:18:00,Marketer,Ship,0.79,Parents will pay and tutoring SEO is a known playbook.
+R055,SUB011,SATtutor,https://shiporSkip.app/s/SUB011,AI Tools,2026-05-14,2026-05-17 09:07:00,Customer,Skip,0.63,I would rather watch YouTube practice videos for free.
+R056,SUB012,DnDcord,https://shiporSkip.app/s/SUB012,Consumer,2026-05-16,2026-05-17 12:42:00,Aesthete,Ship,0.82,The parchment skin and dice animations are genuinely joyful.
+R057,SUB012,DnDcord,https://shiporSkip.app/s/SUB012,Consumer,2026-05-16,2026-05-17 14:55:00,Skeptic,Skip,0.78,The DnD market is mature and Roll20 plus Discord already wins.
+R058,SUB012,DnDcord,https://shiporSkip.app/s/SUB012,Consumer,2026-05-16,2026-05-18 09:14:00,Engineer,Skip,0.67,Real-time canvas plus voice plus dice is a three-system problem they undersized.
+R059,SUB012,DnDcord,https://shiporSkip.app/s/SUB012,Consumer,2026-05-16,2026-05-18 15:36:00,Marketer,Skip,0.71,Crit Role audience is loud but small in revenue terms.
+R060,SUB012,DnDcord,https://shiporSkip.app/s/SUB012,Consumer,2026-05-16,2026-05-19 10:48:00,Customer,Ship,0.80,My Saturday group would switch tomorrow.
