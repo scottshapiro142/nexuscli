@@ -6,7 +6,7 @@ Drop any CSV, XLSX, or SQLite file. Get a local MCP server your AI agent can que
 
 > Obsidian gave us local-first notes. Nexus does the same for structured data.
 
-[Vision post](https://scottshapiro.substack.com/) · [Issues](https://github.com/scottshapiro142/nexus/issues) · MIT licensed
+[Vision post](https://scottshapiro.substack.com/) · [Issues](https://github.com/scottshapiro142/nexuscli/issues) · MIT licensed
 
 ---
 
@@ -146,7 +146,7 @@ Coming in v0.3:
 
 ## Contributing
 
-Bug reports and feature requests welcome at [github.com/scottshapiro142/nexus/issues](https://github.com/scottshapiro142/nexus/issues).
+Bug reports and feature requests welcome at [github.com/scottshapiro142/nexuscli/issues](https://github.com/scottshapiro142/nexuscli/issues).
 
 Pull requests welcome but please open an issue first to discuss approach — this is a young project and the surface is still hardening.
 

@@ -18,13 +18,13 @@
     "xlsx",
     "data"
   ],
-  "homepage": "https://github.com/scottshapiro142/nexus#readme",
+  "homepage": "https://github.com/scottshapiro142/nexuscli#readme",
   "bugs": {
-    "url": "https://github.com/scottshapiro142/nexus/issues"
+    "url": "https://github.com/scottshapiro142/nexuscli/issues"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/scottshapiro142/nexus.git"
+    "url": "git+https://github.com/scottshapiro142/nexuscli.git"
   },
   "license": "MIT",
   "author": "PixelDesigns LLC",
