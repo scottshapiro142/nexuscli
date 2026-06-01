@@ -28,7 +28,10 @@ export interface ServeOpts {
 
 export async function runServe(opts: ServeOpts): Promise<void> {
   const sourceId = resolveSourceId(opts.source);
-  const ctx = loadSourceContext(sourceId);
+  // Progress goes to stderr so we never corrupt the stdio JSON-RPC stream.
+  const ctx = await loadSourceContext(sourceId, {
+    onProgress: (msg) => process.stderr.write(`  ${dim(msg)}\n`),
+  });
 
   if (opts.stdio) {
     // stdio: a single client lives for the process lifetime, so one server

@@ -15,6 +15,7 @@ import {
 import { runList } from "./commands/list";
 import { runQuery } from "./commands/query";
 import { runServe } from "./commands/serve";
+import { runSuggest } from "./commands/suggest";
 import { runTools } from "./commands/tools";
 
 const program = new Command();
@@ -66,6 +67,19 @@ program
       runQuery(viewName, opts);
     } catch (err) {
       process.stderr.write(`nexus query: ${(err as Error).message}\n`);
+      process.exit(1);
+    }
+  });
+
+program
+  .command("suggest")
+  .description("List Iris-generated suggestions for the active source.")
+  .option("--source <id>", "Restrict to one source id")
+  .action((opts) => {
+    try {
+      runSuggest(opts);
+    } catch (err) {
+      process.stderr.write(`nexus suggest: ${(err as Error).message}\n`);
       process.exit(1);
     }
   });

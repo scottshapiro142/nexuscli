@@ -11,8 +11,9 @@
 import * as fs from "node:fs";
 import * as path from "node:path";
 import * as XLSX from "xlsx";
-import { parseCsv } from "@/lib/sheets/fetch-csv";
+import { fetchSheetCsv, parseCsv } from "@/lib/sheets/fetch-csv";
 import { readSqliteAsSheet } from "@/lib/sheets/fetch-sqlite";
+import { parseSheetUrl } from "@/lib/sheets/parse-url";
 import { metaPath } from "@/lib/kernel/paths";
 import type { Source } from "@/lib/kernel/types";
 import { hashRow } from "@/lib/kernel/hash";
@@ -37,14 +38,22 @@ export function readSourceMeta(sourceId: string): Source | null {
   }
 }
 
-export function loadSourceContext(sourceId: string): SourceContext {
+export interface LoadSourceContextOpts {
+  /** Optional progress sink — receives short status strings ahead of network calls. */
+  onProgress?: (message: string) => void;
+}
+
+export async function loadSourceContext(
+  sourceId: string,
+  opts: LoadSourceContextOpts = {}
+): Promise<SourceContext> {
   const source = readSourceMeta(sourceId);
   if (!source) {
     throw new Error(
       `Source meta missing for ${sourceId}. Run \`nexus connect <path>\` first.`
     );
   }
-  const rows = loadRows(source);
+  const rows = await loadRows(source, opts);
   const rowIds: string[] = [];
   const rowsById = new Map<string, Record<string, string>>();
   for (const r of rows) {
@@ -55,7 +64,10 @@ export function loadSourceContext(sourceId: string): SourceContext {
   return { source, rows, rowIds, rowsById };
 }
 
-function loadRows(source: Source): Record<string, string>[] {
+async function loadRows(
+  source: Source,
+  opts: LoadSourceContextOpts
+): Promise<Record<string, string>[]> {
   const ext = path.extname(source.path).toLowerCase();
   if (source.kind === "csv" || ext === ".csv" || ext === ".tsv") {
     return parseCsv(fs.readFileSync(source.path, "utf8")).rows;
@@ -68,9 +80,19 @@ function loadRows(source: Source): Record<string, string>[] {
   if (source.kind === "sqlite") {
     return readSqliteAsSheet({ filePath: source.path, table: source.table }).rows;
   }
-  // google_sheets: requires re-fetch — out of scope for the initial MCP boot.
-  // Encourage the user to `nexus connect` first so we have a local meta.
-  throw new Error(
-    `Source kind '${source.kind}' needs a live re-fetch. Run \`nexus connect ${source.path}\` first.`
-  );
+  if (source.kind === "google_sheets") {
+    opts.onProgress?.("fetching latest from Google Sheets…");
+    const { csvUrl } = parseSheetUrl(source.path);
+    try {
+      const csv = await fetchSheetCsv(csvUrl);
+      return parseCsv(csv).rows;
+    } catch (err) {
+      throw new Error(
+        `Couldn't refetch Google Sheet: ${(err as Error).message}\n` +
+          `  source: ${source.path}\n` +
+          `  Try \`nexus connect <url>\` to re-register.`
+      );
+    }
+  }
+  throw new Error(`Unsupported source kind: ${source.kind}`);
 }

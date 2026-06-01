@@ -126,9 +126,19 @@ export async function runConnect(target: string, opts: ConnectOpts): Promise<voi
       annotations: result.annotationsCreated,
       store: `~/.nexus/${sourceId}/`,
     });
+    printNextSteps(result.views.length);
   } finally {
     closeStore(db);
   }
+}
+
+function printNextSteps(suggestCount: number): void {
+  process.stdout.write(`\n${bold("Try one of these next:")}\n`);
+  if (suggestCount > 0) {
+    process.stdout.write(`  ${dim("→")} nexus suggest          ${dim(`(see ${suggestCount} Iris-generated suggestions)`)}\n`);
+  }
+  process.stdout.write(`  ${dim("→")} nexus serve            ${dim("(start the local MCP server)")}\n`);
+  process.stdout.write(`  ${dim("→")} nexus list             ${dim("(see every saved view/collection/snapshot)")}\n`);
 }
 
 async function loadSheet(target: string, table?: string): Promise<SheetLoad> {
