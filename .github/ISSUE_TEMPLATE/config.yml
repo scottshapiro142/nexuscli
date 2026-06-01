@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Discussion / question
+    url: https://github.com/scottshapiro142/nexuscli/discussions
+    about: For open-ended questions, design discussions, or showing what you built. Bugs and features go through Issues above.
+  - name: npm package
+    url: https://www.npmjs.com/package/@pixeldesigns/nexus
+    about: README, install instructions, and version history.

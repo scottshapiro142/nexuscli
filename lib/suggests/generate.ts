@@ -10,6 +10,7 @@ import OpenAI from "openai";
 import type { ParsedSheet } from "@/lib/sheets/fetch-csv";
 import type { ColumnSummary } from "@/lib/sheets/infer-columns";
 import type { StructuralSummary } from "@/lib/sheets/summarize";
+import { requireOpenRouterKey } from "@/lib/kernel/config";
 import { AppSpecSchema, type AppSpec } from "@/lib/spec/types";
 import type { Tell } from "@/lib/tells/types";
 
@@ -21,10 +22,7 @@ export async function generateSuggests(args: {
   columns: ColumnSummary[];
   tells: Tell[];
 }): Promise<AppSpec[]> {
-  const apiKey = process.env.OPENROUTER_API_KEY;
-  if (!apiKey) {
-    throw new Error("OPENROUTER_API_KEY is not set.");
-  }
+  const apiKey = requireOpenRouterKey();
 
   const client = new OpenAI({
     apiKey,

@@ -59,11 +59,19 @@ nexus serve
 ## Requirements
 
 - **Node.js 20+**
-- **`OPENAI_API_KEY` environment variable** for Iris's semantic read of your sheet. Without it, use `nexus connect <file> --skip-iris` to register the source as raw rows only (no semantic columns, no suggested questions, no Tells).
+- **An OpenRouter API key** for Iris's semantic read of your sheet. Iris is what gives you typed columns, suggested questions, and Tells. Without it you can still `nexus connect <file> --skip-iris` to register the source as raw rows only.
+
+Get a key at [openrouter.ai/keys](https://openrouter.ai/keys), then either:
 
 ```bash
-export OPENAI_API_KEY=sk-...
+# Option A: store it once (writes ~/.nexus/config.json, chmod 600)
+nexus config set-key sk-or-...
+
+# Option B: export per-shell (env always wins over the stored key)
+export OPENROUTER_API_KEY=sk-or-...
 ```
+
+Check what's set with `nexus config get`. Remove the stored key with `nexus config unset-key`.
 
 ---
 
@@ -89,6 +97,11 @@ nexus serve                     Start the MCP server.
   --port <n>                    HTTP port (default 5391)
   --host <h>                    Bind address (default 127.0.0.1)
   --stdio                       Serve over stdio (for `claude mcp add` stdio mode)
+
+nexus config get                Show resolved config (secrets masked).
+nexus config set-key [<key>]    Store OpenRouter API key (or pipe via stdin).
+nexus config unset-key          Remove the stored key.
+nexus config path               Print the config file path.
 ```
 
 ---

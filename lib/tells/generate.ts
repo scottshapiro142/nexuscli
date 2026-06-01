@@ -21,6 +21,7 @@ import OpenAI from "openai";
 import type { ParsedSheet } from "@/lib/sheets/fetch-csv";
 import type { ColumnSummary } from "@/lib/sheets/infer-columns";
 import type { StructuralSummary } from "@/lib/sheets/summarize";
+import { getOpenRouterKey } from "@/lib/kernel/config";
 import { FilterSchema } from "@/lib/spec/types";
 import type { Tell, TellKind } from "./types";
 import { z } from "zod";
@@ -54,7 +55,7 @@ export async function generateTells(args: {
   columns: ColumnSummary[];
   summary: StructuralSummary;
 }): Promise<Tell[]> {
-  const apiKey = process.env.OPENROUTER_API_KEY;
+  const apiKey = getOpenRouterKey();
   if (!apiKey) {
     // No key — skip rather than throw; the page handles an empty Tells block.
     return [];

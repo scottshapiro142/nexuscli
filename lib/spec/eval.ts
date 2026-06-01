@@ -62,7 +62,9 @@ const bold = (s: string) => color(s, 1);
 
 async function main() {
   if (!process.env.OPENROUTER_API_KEY) {
-    console.error("OPENROUTER_API_KEY is not set. Run: npm run env:pull");
+    console.error(
+      "OPENROUTER_API_KEY is not set. Export it in your shell, or run: nexus config set-key <key>"
+    );
     process.exit(1);
   }
 

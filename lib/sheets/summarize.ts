@@ -14,6 +14,7 @@
 import OpenAI from "openai";
 import type { ParsedSheet } from "./fetch-csv";
 import type { ColumnSummary } from "./infer-columns";
+import { requireOpenRouterKey } from "../kernel/config";
 
 const DEFAULT_MODEL = "anthropic/claude-sonnet-4.5";
 
@@ -27,10 +28,7 @@ export async function generateStructuralSummary(
   sheet: ParsedSheet,
   columns: ColumnSummary[]
 ): Promise<StructuralSummary> {
-  const apiKey = process.env.OPENROUTER_API_KEY;
-  if (!apiKey) {
-    throw new Error("OPENROUTER_API_KEY is not set. Add it to nexusApp/.env.local.");
-  }
+  const apiKey = requireOpenRouterKey();
 
   const client = new OpenAI({
     apiKey,

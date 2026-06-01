@@ -6,6 +6,12 @@
 
 import { Command } from "commander";
 import { runConnect } from "./commands/connect";
+import {
+  runConfigGet,
+  runConfigPath,
+  runConfigSetKey,
+  runConfigUnsetKey,
+} from "./commands/config";
 import { runList } from "./commands/list";
 import { runQuery } from "./commands/query";
 import { runServe } from "./commands/serve";
@@ -90,6 +96,58 @@ program
       await runServe(opts);
     } catch (err) {
       process.stderr.write(`nexus serve: ${(err as Error).message}\n`);
+      process.exit(1);
+    }
+  });
+
+const config = program
+  .command("config")
+  .description("Manage user settings stored in ~/.nexus/config.json.");
+
+config
+  .command("get")
+  .description("Print current config (secrets masked).")
+  .action(async () => {
+    try {
+      await runConfigGet();
+    } catch (err) {
+      process.stderr.write(`nexus config get: ${(err as Error).message}\n`);
+      process.exit(1);
+    }
+  });
+
+config
+  .command("set-key [key]")
+  .description("Store an OpenRouter API key. Reads stdin if piped, or prompts.")
+  .action(async (key?: string) => {
+    try {
+      await runConfigSetKey(key);
+    } catch (err) {
+      process.stderr.write(`nexus config set-key: ${(err as Error).message}\n`);
+      process.exit(1);
+    }
+  });
+
+config
+  .command("unset-key")
+  .description("Remove the stored OpenRouter API key.")
+  .action(async () => {
+    try {
+      await runConfigUnsetKey();
+    } catch (err) {
+      process.stderr.write(`nexus config unset-key: ${(err as Error).message}\n`);
+      process.exit(1);
+    }
+  });
+
+config
+  .command("path")
+  .description("Print the config file path.")
+  .action(() => {
+    try {
+      runConfigPath();
+    } catch (err) {
+      process.stderr.write(`nexus config path: ${(err as Error).message}\n`);
       process.exit(1);
     }
   });

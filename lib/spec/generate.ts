@@ -9,6 +9,7 @@ import OpenAI from "openai";
 import type { ParsedSheet } from "../sheets/fetch-csv";
 import type { ColumnSummary } from "../sheets/infer-columns";
 import type { StructuralSummary } from "../sheets/summarize";
+import { requireOpenRouterKey } from "../kernel/config";
 import { AppSpecSchema, type AppSpec } from "./types";
 import { buildSpecPrompt } from "./prompt";
 
@@ -20,10 +21,7 @@ export async function generateAppSpec(args: {
   columns: ColumnSummary[];
   intent: string;
 }): Promise<AppSpec> {
-  const apiKey = process.env.OPENROUTER_API_KEY;
-  if (!apiKey) {
-    throw new Error("OPENROUTER_API_KEY is not set. Add it to nexusApp/.env.local.");
-  }
+  const apiKey = requireOpenRouterKey();
   if (!args.intent || !args.intent.trim()) {
     throw new Error("Intent is empty.");
   }
