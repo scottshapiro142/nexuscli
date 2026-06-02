@@ -122,7 +122,7 @@ Not in this release:
 
 Do not publish until:
 
-- Version is bumped from `0.2.2` to `0.3.0`.
+- `package.json` is set to version `0.3.0`.
 - The manual private-sheet OAuth smoke test has been run with a real Google account.
-- The final verification checklist passes after the version bump.
+- The final verification checklist passes on the `0.3.0` package version.
 - `npm pack --dry-run` still shows only the expected package files.
