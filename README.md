@@ -21,7 +21,7 @@ The four pillars:
 1. **Universal input.** CSV, XLSX, SQLite, Google Sheets — one CLI, any tabular source.
 2. **Agent-native.** Every sheet becomes an MCP server. Claude Code or Cursor sees it as a domain-specific tool palette.
 3. **Non-destructive derivations.** Save subsets, what-if scenarios, filters, point-in-time snapshots, and row annotations — all without touching the master.
-4. **Selective cloud publishing.** Coming in v0.3 — share specific derivations to the cloud while the master stays local.
+4. **Selective cloud publishing.** Coming in v0.3.x — share specific derivations to the cloud while the master stays local.
 
 ---
 
@@ -42,7 +42,25 @@ claude
 > save the stale customers as a collection called "needs-outreach"
 ```
 
-That's the whole flow. Iris (the LLM that reads your sheet semantically) generates a description, columns get typed, suggested questions appear, and your agent gets a tool palette named after your data.
+That's the whole local-file flow. Iris (the LLM that reads your sheet semantically) generates a description, columns get typed, suggested questions appear, and your agent gets a tool palette named after your data.
+
+### Private Google Sheets first run
+
+Public Google Sheets work without auth when the sheet is shared as “Anyone with the link → Viewer.” Private sheets need a one-time Google sign-in:
+
+```bash
+# 1. Sign in once. The top-level alias is equivalent.
+nexus auth login google
+# or: nexus login google
+
+# 2. Quote the URL so shells do not treat ? or #gid as syntax.
+nexus connect "https://docs.google.com/spreadsheets/d/<sheet-id>/edit#gid=0"
+
+# 3. Query saved views from the cached latest rows without reconnecting.
+nexus query <view-name>
+```
+
+Nexus still tries the public CSV export first. If Google responds with a private/login page and you have Google OAuth tokens, Nexus uses the Sheets API v4, converts those rows into the same CSV ingestion pipeline, and stores the latest master snapshot locally for later `nexus query` runs.
 
 ### Going faster after the first run
 
@@ -60,6 +78,7 @@ nexus serve
 
 - **Node.js 20+**
 - **An OpenRouter API key** for Iris's semantic read of your sheet. Iris is what gives you typed columns, suggested questions, and Tells. Without it you can still `nexus connect <file> --skip-iris` to register the source as raw rows only.
+- **For private Google Sheets:** a Google OAuth client configured for Nexus. In development, Nexus reads `NEXUS_GOOGLE_CLIENT_ID` / `NEXUS_GOOGLE_CLIENT_SECRET` (or the `GOOGLE_OAUTH_CLIENT_*` aliases) from the environment.
 
 Get a key at [openrouter.ai/keys](https://openrouter.ai/keys), then either:
 
@@ -120,7 +139,15 @@ nexus auth login google         # or: nexus login google
 nexus connect "https://docs.google.com/spreadsheets/d/<sheet-id>/edit#gid=0"
 ```
 
-Nexus first tries the public CSV export URL. If Google returns a private/login response and Google OAuth tokens are available, it falls back to the Google Sheets API and then feeds the returned rows through the same CSV parser used by local/public sheets. Stored Google tokens live under `~/.nexus` and can be removed with `nexus auth logout google` or `nexus logout google`.
+Nexus first tries the public CSV export URL. If Google returns a private/login response and Google OAuth tokens are available, it falls back to the Google Sheets API and then feeds the returned rows through the same CSV parser used by local/public sheets. Stored Google tokens live under `~/.nexus/auth/google.json` with owner-only file permissions and can be removed with `nexus auth logout google` or `nexus logout google`.
+
+Troubleshooting:
+
+- **Shell says `no matches found` or mangles the URL:** quote Google Sheet URLs. `?` and `#gid=0` have meaning in shells like zsh.
+- **`Missing Google OAuth client credentials`:** set `NEXUS_GOOGLE_CLIENT_ID` and `NEXUS_GOOGLE_CLIENT_SECRET` in the environment, or use the documented local development aliases.
+- **Google did not return a refresh token:** run `nexus auth login google --force` to force the consent screen and rotate the refresh token.
+- **Session expired or revoked:** run `nexus auth login google` again.
+- **Permission denied from Google:** make sure the signed-in account can view the sheet, or switch the sheet to “Anyone with the link → Viewer” and use the public path.
 
 ---
 
@@ -157,19 +184,18 @@ To remove a connected source, delete its directory.
 
 ---
 
-## What's in v0.2
+## What's in v0.3.0
 
 - ✅ CSV / TSV / XLSX / SQLite / public Google Sheets ingestion
+- ✅ Private Google Sheets ingestion through Google OAuth and Sheets API v4
+- ✅ Top-level Google auth aliases: `nexus login google` and `nexus logout google`
+- ✅ Cached `master.latest` rows so `nexus query <view>` can run after `connect` without refetching a private sheet
 - ✅ Iris semantic read (column types, subject, suggested questions, row Tells)
 - ✅ Derivations: views, collections, branches (what-if overlays), snapshots, annotations
 - ✅ MCP server with auto-generated semantic tools per derivation
 - ✅ HTTP and stdio transports
 - ✅ Local SQLite kernel — every operation is persistent across runs
-
-Coming in v0.3:
-
-- Private Google Sheets support via OAuth
-- Release-quality CLI hardening: lint, type-check, build, package dry-run, and ingestion tests
+- ✅ Release-quality hardening: lint, type-check, build, package dry-run, and Sheets ingestion/query-cache tests
 
 Deferred to v0.3.x:
 
