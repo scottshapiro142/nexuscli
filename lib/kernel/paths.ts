@@ -54,3 +54,17 @@ export function ensureNexusHome(): string {
   fs.mkdirSync(home, { recursive: true });
   return home;
 }
+
+export function authDir(): string {
+  return path.join(nexusHome(), "auth");
+}
+
+export function googleAuthPath(): string {
+  return path.join(authDir(), "google.json");
+}
+
+export function ensureAuthDir(): string {
+  const dir = authDir();
+  fs.mkdirSync(dir, { recursive: true });
+  return dir;
+}

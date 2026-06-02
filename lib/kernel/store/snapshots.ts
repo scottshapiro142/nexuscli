@@ -196,7 +196,7 @@ export interface SnapshotRowOut {
 
 export function getSnapshotRows(db: Database, snapshotId: string): SnapshotRowOut[] {
   const rows = db
-    .prepare("SELECT row_id, cells_json FROM snapshot_rows WHERE snapshot_id = ?")
+    .prepare("SELECT row_id, cells_json FROM snapshot_rows WHERE snapshot_id = ? ORDER BY rowid")
     .all(snapshotId) as { row_id: string; cells_json: string }[];
   return rows.map((r) => ({ rowId: r.row_id, cells: JSON.parse(r.cells_json) }));
 }

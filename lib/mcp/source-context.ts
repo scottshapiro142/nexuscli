@@ -11,7 +11,7 @@
 import * as fs from "node:fs";
 import * as path from "node:path";
 import * as XLSX from "xlsx";
-import { fetchSheetCsv, parseCsv } from "@/lib/sheets/fetch-csv";
+import { fetchGoogleSheet, parseCsv } from "@/lib/sheets/fetch-csv";
 import { readSqliteAsSheet } from "@/lib/sheets/fetch-sqlite";
 import { parseSheetUrl } from "@/lib/sheets/parse-url";
 import { metaPath } from "@/lib/kernel/paths";
@@ -82,9 +82,9 @@ async function loadRows(
   }
   if (source.kind === "google_sheets") {
     opts.onProgress?.("fetching latest from Google Sheets…");
-    const { csvUrl } = parseSheetUrl(source.path);
+    const ref = parseSheetUrl(source.path);
     try {
-      const csv = await fetchSheetCsv(csvUrl);
+      const csv = await fetchGoogleSheet(ref);
       return parseCsv(csv).rows;
     } catch (err) {
       throw new Error(

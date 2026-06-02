@@ -80,7 +80,7 @@ Check what's set with `nexus config get`. Remove the stored key with `nexus conf
 ```
 nexus connect <path-or-url>    Register a sheet/database as a master source.
                                  Supports: .csv, .tsv, .xlsx, .xls, .sqlite,
-                                 and public Google Sheets URLs.
+                                 and public/private Google Sheets URLs.
 
 nexus list                      List derivations (views, collections,
                                  branches, snapshots, annotations) for the
@@ -102,7 +102,25 @@ nexus config get                Show resolved config (secrets masked).
 nexus config set-key [<key>]    Store OpenRouter API key (or pipe via stdin).
 nexus config unset-key          Remove the stored key.
 nexus config path               Print the config file path.
+
+nexus auth login google         Sign in to Google for private Sheets access.
+                                Alias: nexus login google
+  --force                       Force re-consent / refresh-token rotation.
+
+nexus auth logout google        Remove stored Google OAuth tokens.
+                                Alias: nexus logout google
 ```
+
+### Private Google Sheets
+
+Public Google Sheets still work through the no-auth CSV export path. For private sheets, sign in once:
+
+```bash
+nexus auth login google         # or: nexus login google
+nexus connect "https://docs.google.com/spreadsheets/d/<sheet-id>/edit#gid=0"
+```
+
+Nexus first tries the public CSV export URL. If Google returns a private/login response and Google OAuth tokens are available, it falls back to the Google Sheets API and then feeds the returned rows through the same CSV parser used by local/public sheets. Stored Google tokens live under `~/.nexus` and can be removed with `nexus auth logout google` or `nexus logout google`.
 
 ---
 
@@ -150,10 +168,14 @@ To remove a connected source, delete its directory.
 
 Coming in v0.3:
 
+- Private Google Sheets support via OAuth
+- Release-quality CLI hardening: lint, type-check, build, package dry-run, and ingestion tests
+
+Deferred to v0.3.x:
+
 - Selective cloud publishing (share specific derivations, master stays local)
 - Project concept (group multiple sheets, one MCP surface)
 - Web UI (the local kernel's third surface, alongside CLI and MCP)
-- Private Google Drive / Sheets support via OAuth
 
 ---
 

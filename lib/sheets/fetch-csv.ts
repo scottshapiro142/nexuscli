@@ -1,9 +1,13 @@
 /**
- * Nexus: Fetch and parse a public Google Sheet as CSV.
+ * Nexus: Fetch and parse Google Sheets as CSV.
  *
- * No dependencies. Tiny CSV parser handles quoted fields with commas and
- * escaped quotes, which is what Google's export produces.
+ * Public sheets go through the CSV export endpoint (no auth, one round-trip).
+ * Private sheets fall back to Sheets API v4 if the user is signed in.
  */
+
+import { loadTokens } from "@/lib/auth/google";
+import type { SheetRef } from "./parse-url";
+import { fetchSheetViaApi } from "./google-api";
 
 export type ParsedSheet = {
   headers: string[];
@@ -11,6 +15,41 @@ export type ParsedSheet = {
   rawRowCount: number;
 };
 
+/**
+ * Auth-aware Google Sheet fetcher. Returns CSV text.
+ *
+ * Strategy:
+ *   1. Try public CSV export (cheapest, no auth).
+ *   2. On 401/403 or HTML-login response, fall back to Sheets API v4 if signed in.
+ *   3. If not signed in, throw with a `nexus auth login google` hint.
+ */
+export async function fetchGoogleSheet(ref: SheetRef): Promise<string> {
+  const res = await fetch(ref.csvUrl, {
+    redirect: "follow",
+    headers: { Accept: "text/csv,*/*" },
+  });
+
+  if (res.ok) {
+    const text = await res.text();
+    if (!looksLikeHtml(text)) return text;
+    // Google returned an HTML login page for a private sheet — try auth path.
+  } else if (res.status !== 401 && res.status !== 403) {
+    throw new Error(`Couldn't fetch the sheet (status ${res.status}).`);
+  }
+
+  if (!loadTokens()) {
+    throw new Error(
+      `That sheet isn't public. Run \`nexus auth login google\` to grant Nexus read access, then try again.\n` +
+        `(Or, in Google Sheets, click Share → "Anyone with the link" → Viewer for the public-only path.)`
+    );
+  }
+
+  return await fetchSheetViaApi(ref);
+}
+
+/**
+ * Direct public-CSV fetch — kept for callers that explicitly want the no-auth path.
+ */
 export async function fetchSheetCsv(csvUrl: string): Promise<string> {
   const res = await fetch(csvUrl, {
     redirect: "follow",
@@ -27,16 +66,17 @@ export async function fetchSheetCsv(csvUrl: string): Promise<string> {
   }
 
   const text = await res.text();
-
-  // Google returns an HTML login page instead of CSV for private sheets.
-  // The body starts with "<!DOCTYPE" or "<HTML" in that case.
-  if (text.trimStart().toLowerCase().startsWith("<")) {
+  if (looksLikeHtml(text)) {
     throw new Error(
       "That sheet isn't public. In Google Sheets, click Share, then set 'Anyone with the link' to Viewer."
     );
   }
 
   return text;
+}
+
+function looksLikeHtml(text: string): boolean {
+  return text.trimStart().toLowerCase().startsWith("<");
 }
 
 export function parseCsv(text: string): ParsedSheet {

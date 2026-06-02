@@ -6,7 +6,7 @@
 import * as fs from "node:fs";
 import * as path from "node:path";
 import { parseCsv, type ParsedSheet } from "@/lib/sheets/fetch-csv";
-import { fetchSheetCsv } from "@/lib/sheets/fetch-csv";
+import { fetchGoogleSheet } from "@/lib/sheets/fetch-csv";
 import { parseSheetUrl } from "@/lib/sheets/parse-url";
 import { isSqlitePath, readSqliteAsSheet } from "@/lib/sheets/fetch-sqlite";
 import * as XLSX from "xlsx";
@@ -144,7 +144,7 @@ function printNextSteps(suggestCount: number): void {
 async function loadSheet(target: string, table?: string): Promise<SheetLoad> {
   if (/^https?:\/\//i.test(target)) {
     const parsed = parseSheetUrl(target);
-    const csv = await fetchSheetCsv(parsed.csvUrl);
+    const csv = await fetchGoogleSheet(parsed);
     return { sheet: parseCsv(csv), kind: "google_sheets", resolvedPath: target };
   }
 

@@ -98,18 +98,30 @@ export function BuildCursor({ containerRef }: { containerRef: React.RefObject<HT
 
   // Activate cursor + scroll the renderer into view so the build is visible.
   useEffect(() => {
+    let cancelled = false;
+
+    const setCursorState = (nextActive: boolean, nextTarget: { x: number; y: number } | null) => {
+      requestAnimationFrame(() => {
+        if (cancelled) return;
+        setActive(nextActive);
+        setTarget(nextTarget);
+      });
+    };
+
     if (mode !== "build") {
-      setActive(false);
-      setTarget(null);
-      return;
+      setCursorState(false, null);
+      return () => {
+        cancelled = true;
+      };
     }
-    setActive(true);
+    setCursorState(true, null);
 
     // Scroll the container into the viewport top-third on mount, so the
     // assembly happens where the user is looking.
     const el = containerRef.current;
     if (el) {
       requestAnimationFrame(() => {
+        if (cancelled) return;
         const r = el.getBoundingClientRect();
         if (r.top < 80 || r.top > window.innerHeight - 200) {
           window.scrollTo({
@@ -119,6 +131,10 @@ export function BuildCursor({ containerRef }: { containerRef: React.RefObject<HT
         }
       });
     }
+
+    return () => {
+      cancelled = true;
+    };
   }, [mode, containerRef]);
 
   useLayoutEffect(() => {

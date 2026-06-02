@@ -7,7 +7,7 @@
  */
 
 import { closeStore, getSource, listViews, openStore } from "@/lib/kernel/store";
-import { bold, dim, fail, resolveSourceId } from "../util";
+import { bold, dim, resolveSourceId } from "../util";
 
 export interface SuggestOpts {
   source?: string;

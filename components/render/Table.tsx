@@ -20,7 +20,7 @@ export default function TableView({ spec, rows }: { spec: Spec; rows: Row[] }) {
   const [chipState, setChipState] = useState<Record<string, string | null>>({});
   const [page, setPage] = useState(0);
 
-  const chipFields = spec.filter_chips ?? [];
+  const chipFields = useMemo(() => spec.filter_chips ?? [], [spec.filter_chips]);
 
   const chipOptions = useMemo(() => {
     const out: Record<string, string[]> = {};

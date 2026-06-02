@@ -30,6 +30,7 @@ import {
   createSnapshot,
   getViewByName,
   getSnapshotByName,
+  deleteSnapshot,
 } from "@/lib/kernel/store";
 import type { Source, View } from "@/lib/kernel/types";
 import { slugify, nowIso } from "@/lib/kernel/ids";
@@ -56,9 +57,10 @@ export interface PersistArgs {
  * views/snapshots that already exist by name (re-connect is safe).
  */
 export function persistIrisOutput(args: PersistArgs): ConnectResult {
-  const { db, source, summary, tells, suggests } = args;
+  const { db, source, sheet, summary, tells, suggests } = args;
 
   upsertSource(db, source);
+  persistLatestMasterRows(db, source, sheet);
 
   const views: View[] = [];
   for (let i = 0; i < suggests.length; i++) {
@@ -138,6 +140,22 @@ export function persistIrisOutput(args: PersistArgs): ConnectResult {
     annotationsCreated,
     snapshotCreated,
   };
+}
+
+function persistLatestMasterRows(db: Database, source: Source, sheet: ParsedSheet): void {
+  const existing = getSnapshotByName(db, source.id, "master.latest");
+  if (existing) deleteSnapshot(db, existing.id);
+
+  createSnapshot(db, {
+    sourceId: source.id,
+    name: "master.latest",
+    title: "Latest master rows",
+    description: "Cached rows from the most recent nexus connect run.",
+    flavor: "rows",
+    headers: sheet.headers,
+    rows: sheet.rows,
+    author: "cli",
+  });
 }
 
 // ---- AppSpec → View extraction --------------------------------------------

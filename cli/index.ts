@@ -12,6 +12,7 @@ import {
   runConfigSetKey,
   runConfigUnsetKey,
 } from "./commands/config";
+import { runGoogleLogin, runGoogleLogout } from "./commands/google-auth";
 import { runList } from "./commands/list";
 import { runQuery } from "./commands/query";
 import { runServe } from "./commands/serve";
@@ -165,5 +166,58 @@ config
       process.exit(1);
     }
   });
+
+const auth = program
+  .command("auth")
+  .description("Manage authentication for external sources.");
+
+function assertGoogleProvider(provider: string, commandName: string): void {
+  if (provider !== "google") {
+    process.stderr.write(`nexus ${commandName}: unknown provider '${provider}'. Try 'google'.\n`);
+    process.exit(1);
+  }
+}
+
+async function loginGoogle(provider: string, opts: { force?: boolean }, commandName: string): Promise<void> {
+  try {
+    assertGoogleProvider(provider, commandName);
+    await runGoogleLogin(opts);
+  } catch (err) {
+    process.stderr.write(`nexus ${commandName}: ${(err as Error).message}\n`);
+    process.exit(1);
+  }
+}
+
+async function logoutGoogle(provider: string, commandName: string): Promise<void> {
+  try {
+    assertGoogleProvider(provider, commandName);
+    await runGoogleLogout();
+  } catch (err) {
+    process.stderr.write(`nexus ${commandName}: ${(err as Error).message}\n`);
+    process.exit(1);
+  }
+}
+
+program
+  .command("login <provider>")
+  .description("Sign in to a provider (currently: google). Alias for `nexus auth login`.")
+  .option("--force", "Force re-consent (re-issues the refresh token)")
+  .action((provider: string, opts) => loginGoogle(provider, opts, "login"));
+
+program
+  .command("logout <provider>")
+  .description("Sign out of a provider (currently: google). Alias for `nexus auth logout`.")
+  .action((provider: string) => logoutGoogle(provider, "logout"));
+
+auth
+  .command("login <provider>")
+  .description("Sign in to a provider (currently: google).")
+  .option("--force", "Force re-consent (re-issues the refresh token)")
+  .action((provider: string, opts) => loginGoogle(provider, opts, "auth login"));
+
+auth
+  .command("logout <provider>")
+  .description("Sign out of a provider (currently: google).")
+  .action((provider: string) => logoutGoogle(provider, "auth logout"));
 
 program.parseAsync(process.argv);

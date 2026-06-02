@@ -49,3 +49,9 @@ next-env.d.ts
 .idea/
 *.swp
 *.swo
+
+# local-only operational docs (accounts, pointers — never secrets)
+*.local.md
+
+# local staging for deliverables to other repos
+.tmp/

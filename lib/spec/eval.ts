@@ -13,16 +13,14 @@
  */
 
 import { readFileSync } from "node:fs";
-import { resolve, dirname } from "node:path";
-import { fileURLToPath } from "node:url";
+import { resolve } from "node:path";
 import { parseCsv } from "../sheets/fetch-csv";
 import { inferColumns } from "../sheets/infer-columns";
 import { generateStructuralSummary } from "../sheets/summarize";
 import { generateAppSpec } from "./generate";
 import type { AppSpec, Archetype } from "./types";
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
-const REPO_ROOT = resolve(__dirname, "../../..");
+const REPO_ROOT = process.cwd();
 
 type Case = { intent: string; expected: Archetype };
 type Sheet = { label: string; csvPath: string; cases: Case[] };

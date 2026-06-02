@@ -48,6 +48,7 @@
     "build": "next build",
     "start": "next start -p 3003",
     "lint": "eslint",
+    "test": "node --import tsx --test tests/**/*.test.ts",
     "build:cli": "tsup",
     "prepublishOnly": "npm run build:cli",
     "env:pull": "bash scripts/pull-env.sh",

@@ -12,7 +12,7 @@
 
 import * as fs from "node:fs";
 import * as path from "node:path";
-import { openStore, closeStore, getViewByName } from "@/lib/kernel/store";
+import { openStore, closeStore, getViewByName, getSnapshotByName, getSnapshotRows } from "@/lib/kernel/store";
 import { applyFilters } from "@/lib/render/filter";
 import { applySort } from "@/lib/render/sort";
 import { parseCsv } from "@/lib/sheets/fetch-csv";
@@ -40,7 +40,7 @@ export function runQuery(viewName: string, opts: QueryOpts): void {
     if (!source) {
       fail(`Source meta missing for ${sourceId}. Try re-running \`nexus connect\`.`);
     }
-    const rows = loadMasterRows(source);
+    const rows = loadMasterRows(db, source);
 
     const filtered = applyFilters(rows, view.filters);
     const sorted = applySort(filtered, view.sort);
@@ -79,7 +79,7 @@ function readMetaFile(sourceId: string): Source | null {
   }
 }
 
-function loadMasterRows(source: Source): Record<string, string>[] {
+function loadMasterRows(db: ReturnType<typeof openStore>, source: Source): Record<string, string>[] {
   const ext = path.extname(source.path).toLowerCase();
   if (source.kind === "csv" || ext === ".csv" || ext === ".tsv") {
     const text = fs.readFileSync(source.path, "utf8");
@@ -93,8 +93,12 @@ function loadMasterRows(source: Source): Record<string, string>[] {
   if (source.kind === "sqlite") {
     return readSqliteAsSheet({ filePath: source.path, table: source.table }).rows;
   }
-  // google_sheets — would re-fetch. For now we keep things offline; encourage re-connect.
-  fail(
-    `Source kind '${source.kind}' needs a live re-fetch to query. Run \`nexus connect ${source.path}\` first, then retry.`
-  );
+  if (source.kind === "google_sheets") {
+    const latest = getSnapshotByName(db, source.id, "master.latest");
+    if (latest) return getSnapshotRows(db, latest.id).map((row) => row.cells);
+    fail(
+      `Source kind '${source.kind}' has no cached rows yet. Run \`nexus connect ${source.path}\` first, then retry.`
+    );
+  }
+  fail(`Unsupported source kind '${source.kind}'.`);
 }

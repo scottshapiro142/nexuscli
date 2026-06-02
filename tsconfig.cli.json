@@ -2,13 +2,14 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "noEmit": false,
-    "module": "commonjs",
-    "moduleResolution": "node",
+    "module": "node20",
+    "moduleResolution": "node16",
     "target": "es2022",
     "outDir": "./dist",
     "rootDir": "./",
     "declaration": false,
     "sourceMap": false,
+    "incremental": false,
     "jsx": "preserve",
     "paths": {
       "@/*": ["./*"]
