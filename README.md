@@ -77,10 +77,17 @@ nexus serve
 ## Requirements
 
 - **Node.js 20+**
-- **An OpenRouter API key** for Iris's semantic read of your sheet. Iris is what gives you typed columns, suggested questions, and Tells. Without it you can still `nexus connect <file> --skip-iris` to register the source as raw rows only.
-- **For private Google Sheets:** a Google OAuth client configured for Nexus. In development, Nexus reads `NEXUS_GOOGLE_CLIENT_ID` / `NEXUS_GOOGLE_CLIENT_SECRET` (or the `GOOGLE_OAUTH_CLIENT_*` aliases) from the environment.
+- **For private Google Sheets:** nothing extra — Nexus ships with a registered Google OAuth client, so `nexus auth login google` just works. (Contributors who want to BYO credentials can set `NEXUS_GOOGLE_CLIENT_ID` / `NEXUS_GOOGLE_CLIENT_SECRET`.)
 
-Get a key at [openrouter.ai/keys](https://openrouter.ai/keys), then either:
+Nexus uses an LLM (Iris) to pre-read your sheet — typed columns, structural summary, suggested views, and non-obvious patterns ("Tells"). Iris is optional. Three backends, auto-detected in this order:
+
+1. **Claude Code** if `claude` is on your `PATH`. Uses your existing Claude Code auth — no second key. Each `nexus connect` consumes a small amount of your Claude usage.
+2. **OpenRouter** if `OPENROUTER_API_KEY` is set (env or `~/.nexus/config.json`).
+3. **Local** — no LLM. `nexus connect` ingests, types columns, and persists rows. Your agent forms its own description of the sheet on first MCP contact.
+
+Force a specific backend with `--sampler local|claude-code|openrouter` on `nexus connect`, or `NEXUS_SAMPLER=...` env. Override the model picked by Claude Code or OpenRouter with `NEXUS_MODEL=...`.
+
+To use OpenRouter, get a key at [openrouter.ai/keys](https://openrouter.ai/keys), then either:
 
 ```bash
 # Option A: store it once (writes ~/.nexus/config.json, chmod 600)
@@ -100,6 +107,9 @@ Check what's set with `nexus config get`. Remove the stored key with `nexus conf
 nexus connect <path-or-url>    Register a sheet/database as a master source.
                                  Supports: .csv, .tsv, .xlsx, .xls, .sqlite,
                                  and public/private Google Sheets URLs.
+  --sampler <backend>            Iris backend: local | claude-code | openrouter.
+                                 Auto-detected if omitted.
+  --skip-iris                    Don't run Iris at all (alias for --sampler local).
 
 nexus list                      List derivations (views, collections,
                                  branches, snapshots, annotations) for the
@@ -144,7 +154,6 @@ Nexus first tries the public CSV export URL. If Google returns a private/login r
 Troubleshooting:
 
 - **Shell says `no matches found` or mangles the URL:** quote Google Sheet URLs. `?` and `#gid=0` have meaning in shells like zsh.
-- **`Missing Google OAuth client credentials`:** set `NEXUS_GOOGLE_CLIENT_ID` and `NEXUS_GOOGLE_CLIENT_SECRET` in the environment, or use the documented local development aliases.
 - **Google did not return a refresh token:** run `nexus auth login google --force` to force the consent screen and rotate the refresh token.
 - **Session expired or revoked:** run `nexus auth login google` again.
 - **Permission denied from Google:** make sure the signed-in account can view the sheet, or switch the sheet to “Anyone with the link → Viewer” and use the public path.
@@ -167,6 +176,48 @@ claude mcp add nexus -- npx @pixeldesigns/nexus serve --stdio
 ```
 
 Once added, `/mcp` inside Claude Code shows Nexus's tools, including auto-generated ones (`query_<your-view>`, `read_<your-collection>`) that reflect the derivations you've saved.
+
+---
+
+## How Nexus compares to similar tools
+
+|  | **Nexus** | Datasette | DuckDB UI | Quadratic | Rill | OpenAI Code Interpreter | Copilot for Excel |
+| --- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| Runs entirely on your machine | ✅ | ✅ | ✅ | ❌ | ✅ | ❌ | ❌ |
+| Reads CSV / XLSX / SQLite / Sheets | ✅ | ⚠️ SQLite-first | ✅ | ⚠️ in-app only | ⚠️ Parquet-first | ⚠️ upload | ❌ Excel only |
+| Exposes data to your AI agent (MCP) | ✅ | ❌ | ❌ | ⚠️ in-app AI | ❌ | ❌ | ⚠️ in-app AI |
+| Typed semantic layer (not raw cells) | ✅ Iris | ❌ | ❌ | ❌ | ✅ metrics | ❌ | ⚠️ partial |
+| Non-destructive derivations (views, branches, snapshots) | ✅ | ❌ | ❌ | ❌ | ⚠️ dashboards | ❌ | ❌ |
+| Open source | ✅ MIT | ✅ Apache | ✅ MIT | ⚠️ AGPL/cloud | ✅ Apache | ❌ | ❌ |
+
+**When to pick which:**
+
+- **Datasette** — best for publishing a SQLite database as a browsable web UI. Different audience (data journalism, public datasets), no agent integration.
+- **DuckDB UI** — best for fast local analytical SQL over Parquet/CSV. Querying engine, not agent layer.
+- **Quadratic / Copilot / Code Interpreter** — best when uploading is fine and you want a polished in-app AI experience. Nexus exists for the case when uploading is *not* fine.
+- **Rill** — best for local-first BI dashboards. Overlapping local-first ethos; different primitive (dashboards vs. agent tools).
+- **Nexus** — best when you want your existing AI agent (Claude Code, Cursor, any MCP client) to query your spreadsheets *in place*, without uploading, with a non-destructive layer for what-ifs.
+
+---
+
+## Security model — Google OAuth credentials
+
+Nexus ships with a registered Google "Desktop app" OAuth client embedded in the binary. The client ID and secret are visible in the published source and npm tarball. This is deliberate:
+
+1. **Google's Desktop app client type requires `client_secret` on every token exchange.** PKCE-only is not viable (empirically verified — see `lib/auth/google/client-creds.ts`). The token endpoint returns `400 client_secret is missing.` when the secret is omitted.
+2. **Google explicitly states** the Desktop client secret "is obviously not treated as a secret" — see https://developers.google.com/identity/protocols/oauth2.
+3. **Every comparable OSS CLI ships its embedded secret.** `gcloud`, `gh`, `firebase`, and `npm` all distribute Google OAuth client secrets in their binaries.
+
+What this gives you:
+- Zero configuration. Install Nexus and `nexus auth login google` works.
+- PKCE still protects against auth-code interception.
+- Your refresh token, your scope, your data — all on your machine.
+
+What this means for the client identity:
+- Nexus users authenticate as themselves to Google, *via* the registered PixelDesigns "Nexus" app. The consent screen shows "Nexus wants to access your Google Sheets."
+- PixelDesigns can see, in the GCP Console audit log, that a given Google account granted Nexus access at a given time. PixelDesigns cannot see the data — it never passes through PixelDesigns infrastructure.
+
+To use your own credentials instead (uncommon, but supported): set `NEXUS_GOOGLE_CLIENT_ID` and `NEXUS_GOOGLE_CLIENT_SECRET` in the environment. They override the embedded constants.
 
 ---
 
