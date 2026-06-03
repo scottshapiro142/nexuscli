@@ -1,6 +1,6 @@
 {
   "name": "@pixeldesigns/nexus",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Local-first agent layer for tabular data. Drop any CSV, XLSX, or SQLite file — get a local MCP server your AI agent can query without your data ever leaving your machine.",
   "keywords": [
     "mcp",
