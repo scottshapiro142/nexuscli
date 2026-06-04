@@ -1,6 +1,6 @@
 {
   "name": "@pixeldesigns/nexus",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "description": "Local-first agent layer for tabular data. Drop any CSV, XLSX, or SQLite file — get a local MCP server your AI agent can query without your data ever leaving your machine.",
   "keywords": [
     "mcp",
@@ -35,15 +35,16 @@
   "bin": {
     "nexus": "dist/cli/index.js"
   },
+  "engines": {
+    "node": ">=20.0.0 <23.0.0 || >=24.0.0"
+  },
   "files": [
     "dist",
     "README.md",
     "LICENSE"
   ],
-  "engines": {
-    "node": ">=20"
-  },
   "scripts": {
+    "preinstall": "node -e \"const m=parseInt(process.versions.node);if(m===23){console.error('\\n  Nexus does not support Node 23 (odd-numbered, no LTS).\\n  You are on Node '+process.versions.node+', which has no prebuilt better-sqlite3 binary and triggers a node-gyp build that often fails.\\n\\n  Fix: use an LTS version.\\n    nvm install 22 && nvm use 22\\n    npm i -g @pixeldesigns/nexus\\n');process.exit(1);}\"",
     "dev": "next dev -p 3003",
     "build": "next build",
     "start": "next start -p 3003",
