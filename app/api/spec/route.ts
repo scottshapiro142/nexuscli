@@ -16,6 +16,7 @@ import { NextRequest, NextResponse } from "next/server";
 import type { ColumnSummary } from "@/lib/sheets/infer-columns";
 import type { StructuralSummary } from "@/lib/sheets/summarize";
 import { generateAppSpec } from "@/lib/spec/generate";
+import { resolveSampler } from "@/lib/iris/sampler";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -47,16 +48,19 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const spec = await generateAppSpec({
-      sheet: {
-        headers: body.sheet.headers,
-        rows: body.sheet.rows,
-        rawRowCount: body.sheet.rowCount,
+    const spec = await generateAppSpec(
+      {
+        sheet: {
+          headers: body.sheet.headers,
+          rows: body.sheet.rows,
+          rawRowCount: body.sheet.rowCount,
+        },
+        summary: body.summary,
+        columns: body.columns,
+        intent: body.intent.trim(),
       },
-      summary: body.summary,
-      columns: body.columns,
-      intent: body.intent.trim(),
-    });
+      await resolveSampler({ force: "openrouter" })
+    );
     return NextResponse.json({ spec });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Something went wrong.";

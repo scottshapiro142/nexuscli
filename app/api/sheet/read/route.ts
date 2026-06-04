@@ -17,6 +17,7 @@ import { fetchSheetCsv, parseCsv, type ParsedSheet } from "@/lib/sheets/fetch-cs
 import { readSqliteAsSheet } from "@/lib/sheets/fetch-sqlite";
 import { analyzeSheet } from "@/lib/sheets/analyze";
 import { generateTells } from "@/lib/tells/generate";
+import { resolveSampler } from "@/lib/iris/sampler";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -93,8 +94,9 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "The sheet looks empty." }, { status: 422 });
     }
 
-    const { columns, summary } = await analyzeSheet(sheet);
-    const tells = await generateTells({ sheet, columns, summary });
+    const sampler = await resolveSampler({ force: "openrouter" });
+    const { columns, summary } = await analyzeSheet(sheet, sampler);
+    const tells = await generateTells({ sheet, columns, summary }, sampler);
 
     return NextResponse.json({
       ref,

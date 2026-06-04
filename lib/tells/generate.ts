@@ -17,16 +17,14 @@
  * predicate exists, the insight is text-only.
  */
 
-import OpenAI from "openai";
 import type { ParsedSheet } from "@/lib/sheets/fetch-csv";
 import type { ColumnSummary } from "@/lib/sheets/infer-columns";
 import type { StructuralSummary } from "@/lib/sheets/summarize";
-import { getOpenRouterKey } from "@/lib/kernel/config";
+import type { Sampler } from "@/lib/iris/sampler";
 import { FilterSchema } from "@/lib/spec/types";
 import type { Tell, TellKind } from "./types";
 import { z } from "zod";
 
-const DEFAULT_MODEL = "anthropic/claude-sonnet-4.5";
 const MAX_ROW_SAMPLE = 80;
 
 const KindEnum = z.enum([
@@ -50,35 +48,20 @@ const ResponseSchema = z.object({
   insights: z.array(TellSchema).min(0).max(8),
 });
 
-export async function generateTells(args: {
-  sheet: ParsedSheet;
-  columns: ColumnSummary[];
-  summary: StructuralSummary;
-}): Promise<Tell[]> {
-  const apiKey = getOpenRouterKey();
-  if (!apiKey) {
-    // No key — skip rather than throw; the page handles an empty Tells block.
-    return [];
-  }
-
-  const client = new OpenAI({
-    apiKey,
-    baseURL: "https://openrouter.ai/api/v1",
-    defaultHeaders: { "HTTP-Referer": "https://nexus.local", "X-Title": "Nexus" },
-  });
+export async function generateTells(
+  args: {
+    sheet: ParsedSheet;
+    columns: ColumnSummary[];
+    summary: StructuralSummary;
+  },
+  sampler: Sampler
+): Promise<Tell[]> {
+  if (!sampler.canSample) return [];
 
   const prompt = buildPrompt(args);
-  const model = process.env.NEXUS_MODEL ?? DEFAULT_MODEL;
 
   try {
-    const response = await client.chat.completions.create({
-      model,
-      max_tokens: 1800,
-      response_format: { type: "json_object" },
-      messages: [{ role: "user", content: prompt }],
-    });
-
-    const raw = response.choices[0]?.message?.content?.trim() ?? "";
+    const raw = await sampler.complete({ prompt, maxTokens: 1800, jsonObject: true });
     if (!raw) return [];
 
     const parsed = JSON.parse(stripCodeFences(raw)) as unknown;

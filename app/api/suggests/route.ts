@@ -17,6 +17,7 @@ import type { ColumnSummary } from "@/lib/sheets/infer-columns";
 import type { StructuralSummary } from "@/lib/sheets/summarize";
 import type { Tell } from "@/lib/tells/types";
 import { generateSuggests } from "@/lib/suggests/generate";
+import { resolveSampler } from "@/lib/iris/sampler";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -44,16 +45,19 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const apps = await generateSuggests({
-      sheet: {
-        headers: body.sheet.headers,
-        rows: body.sheet.rows,
-        rawRowCount: body.sheet.rowCount,
+    const apps = await generateSuggests(
+      {
+        sheet: {
+          headers: body.sheet.headers,
+          rows: body.sheet.rows,
+          rawRowCount: body.sheet.rowCount,
+        },
+        summary: body.summary,
+        columns: body.columns,
+        tells: body.tells ?? [],
       },
-      summary: body.summary,
-      columns: body.columns,
-      tells: body.tells ?? [],
-    });
+      await resolveSampler({ force: "openrouter" })
+    );
     return NextResponse.json({ apps });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Something went wrong.";

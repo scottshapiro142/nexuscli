@@ -9,14 +9,15 @@
 import type { ParsedSheet } from "./fetch-csv";
 import { inferColumns, type ColumnSummary } from "./infer-columns";
 import { generateStructuralSummary, type StructuralSummary } from "./summarize";
+import type { Sampler } from "@/lib/iris/sampler";
 
 export type SheetAnalysis = {
   columns: ColumnSummary[];
   summary: StructuralSummary;
 };
 
-export async function analyzeSheet(sheet: ParsedSheet): Promise<SheetAnalysis> {
+export async function analyzeSheet(sheet: ParsedSheet, sampler: Sampler): Promise<SheetAnalysis> {
   const columns = inferColumns(sheet);
-  const summary = await generateStructuralSummary(sheet, columns);
+  const summary = await generateStructuralSummary(sheet, columns, sampler);
   return { columns, summary };
 }

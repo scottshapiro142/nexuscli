@@ -18,6 +18,7 @@ import { parseCsv } from "../sheets/fetch-csv";
 import { inferColumns } from "../sheets/infer-columns";
 import { generateStructuralSummary } from "../sheets/summarize";
 import { generateAppSpec } from "./generate";
+import { resolveSampler } from "../iris/sampler";
 import type { AppSpec, Archetype } from "./types";
 
 const REPO_ROOT = process.cwd();
@@ -82,14 +83,15 @@ async function main() {
     const parsed = parseCsv(csv);
     const columns = inferColumns(parsed);
     process.stdout.write(dim("  summarizing... "));
-    const summary = await generateStructuralSummary(parsed, columns);
+    const sampler = await resolveSampler({ force: "openrouter" });
+    const summary = await generateStructuralSummary(parsed, columns, sampler);
     console.log(dim(`subject: ${summary.subject}`));
 
     for (const c of sheet.cases) {
       const label = `  intent: "${c.intent}"  (expected: ${c.expected})`;
       process.stdout.write(label + dim(" ... "));
       try {
-        const spec = await generateAppSpec({ sheet: parsed, summary, columns, intent: c.intent });
+        const spec = await generateAppSpec({ sheet: parsed, summary, columns, intent: c.intent }, sampler);
         if (spec.archetype === c.expected) {
           console.log(green(`OK [${spec.archetype}]`));
           pass++;

@@ -5,44 +5,33 @@
  * model produces something off-schema (which is then surfaceable to the user).
  */
 
-import OpenAI from "openai";
 import type { ParsedSheet } from "../sheets/fetch-csv";
 import type { ColumnSummary } from "../sheets/infer-columns";
 import type { StructuralSummary } from "../sheets/summarize";
-import { requireOpenRouterKey } from "../kernel/config";
+import type { Sampler } from "@/lib/iris/sampler";
 import { AppSpecSchema, type AppSpec } from "./types";
 import { buildSpecPrompt } from "./prompt";
 
-const DEFAULT_MODEL = "anthropic/claude-sonnet-4.5";
-
-export async function generateAppSpec(args: {
-  sheet: ParsedSheet;
-  summary: StructuralSummary;
-  columns: ColumnSummary[];
-  intent: string;
-}): Promise<AppSpec> {
-  const apiKey = requireOpenRouterKey();
+export async function generateAppSpec(
+  args: {
+    sheet: ParsedSheet;
+    summary: StructuralSummary;
+    columns: ColumnSummary[];
+    intent: string;
+  },
+  sampler: Sampler
+): Promise<AppSpec> {
+  if (!sampler.canSample) {
+    throw new Error(
+      "generateAppSpec called with a non-sampling backend. Guard with sampler.canSample at the caller."
+    );
+  }
   if (!args.intent || !args.intent.trim()) {
     throw new Error("Intent is empty.");
   }
 
-  const client = new OpenAI({
-    apiKey,
-    baseURL: "https://openrouter.ai/api/v1",
-    defaultHeaders: { "HTTP-Referer": "https://nexus.local", "X-Title": "Nexus" },
-  });
-
   const prompt = buildSpecPrompt(args);
-  const model = process.env.NEXUS_MODEL ?? DEFAULT_MODEL;
-
-  const response = await client.chat.completions.create({
-    model,
-    max_tokens: 1500,
-    response_format: { type: "json_object" },
-    messages: [{ role: "user", content: prompt }],
-  });
-
-  const raw = response.choices[0]?.message?.content?.trim() ?? "";
+  const raw = await sampler.complete({ prompt, maxTokens: 1500, jsonObject: true });
   if (!raw) throw new Error("Model returned an empty response.");
 
   let json: unknown;

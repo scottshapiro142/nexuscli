@@ -19,12 +19,14 @@ import { persistIrisOutput } from "@/lib/kernel/iris-bridge";
 import type { Source } from "@/lib/kernel/types";
 import { nowIso } from "@/lib/kernel/ids";
 import { ensureStoreDir, metaPath } from "@/lib/kernel/paths";
+import { resolveSampler, type SamplerKind } from "@/lib/iris/sampler";
 import { fail, printKV, bold, dim } from "../util";
 
 export interface ConnectOpts {
   table?: string;
   source?: string;
   skipIris?: boolean;
+  sampler?: SamplerKind;
 }
 
 interface SheetLoad {
@@ -41,11 +43,14 @@ export async function runConnect(target: string, opts: ConnectOpts): Promise<voi
     `  read ${load.sheet.headers.length} columns, ${load.sheet.rawRowCount} rows (${load.kind})\n`
   );
 
+  const sampler = opts.skipIris ? null : await resolveSampler({ force: opts.sampler });
+  if (sampler) printSamplerNotice(sampler.kind);
+
   const sourceId = hashSheet(load.sheet);
   ensureStoreDir(sourceId);
   const db = openStore(sourceId);
   try {
-    if (opts.skipIris) {
+    if (opts.skipIris || !sampler?.canSample) {
       const source: Source = {
         id: sourceId,
         kind: load.kind,
@@ -69,26 +74,33 @@ export async function runConnect(target: string, opts: ConnectOpts): Promise<voi
       writeMetaFile(sourceId, source);
       process.stdout.write(`  source registered (no Iris run)\n`);
       printKV({ id: sourceId, store: `~/.nexus/${sourceId}/` });
+      printLocalNextSteps();
       return;
     }
 
     process.stdout.write(`  iris reading ...\n`);
-    const analyzed = await analyzeSheet(load.sheet);
+    const analyzed = await analyzeSheet(load.sheet, sampler);
     process.stdout.write(`  iris noticing ...\n`);
-    const tells = await generateTells({
-      sheet: load.sheet,
-      columns: analyzed.columns,
-      summary: analyzed.summary,
-    });
-    process.stdout.write(`  iris suggesting apps ...\n`);
-    let suggests: Awaited<ReturnType<typeof generateSuggests>> = [];
-    try {
-      suggests = await generateSuggests({
+    const tells = await generateTells(
+      {
         sheet: load.sheet,
         columns: analyzed.columns,
         summary: analyzed.summary,
-        tells,
-      });
+      },
+      sampler
+    );
+    process.stdout.write(`  iris suggesting apps ...\n`);
+    let suggests: Awaited<ReturnType<typeof generateSuggests>> = [];
+    try {
+      suggests = await generateSuggests(
+        {
+          sheet: load.sheet,
+          columns: analyzed.columns,
+          summary: analyzed.summary,
+          tells,
+        },
+        sampler
+      );
     } catch (err) {
       process.stdout.write(`  ${dim(`iris suggests failed: ${(err as Error).message}`)}\n`);
     }
@@ -132,6 +144,24 @@ export async function runConnect(target: string, opts: ConnectOpts): Promise<voi
   }
 }
 
+function printSamplerNotice(kind: SamplerKind): void {
+  switch (kind) {
+    case "claude-code":
+      process.stdout.write(
+        `  ${dim("iris: using Claude Code (consumes your Claude usage; --sampler local to disable)")}\n`
+      );
+      return;
+    case "openrouter":
+      process.stdout.write(`  ${dim("iris: using OpenRouter")}\n`);
+      return;
+    case "local":
+      process.stdout.write(
+        `  ${dim("iris: off (no LLM detected). Your agent will describe this sheet on first contact.")}\n`
+      );
+      return;
+  }
+}
+
 function printNextSteps(suggestCount: number): void {
   process.stdout.write(`\n${bold("Try one of these next:")}\n`);
   if (suggestCount > 0) {
@@ -139,6 +169,14 @@ function printNextSteps(suggestCount: number): void {
   }
   process.stdout.write(`  ${dim("→")} nexus serve            ${dim("(start the local MCP server)")}\n`);
   process.stdout.write(`  ${dim("→")} nexus list             ${dim("(see every saved view/collection/snapshot)")}\n`);
+}
+
+function printLocalNextSteps(): void {
+  process.stdout.write(`\n${bold("Try one of these next:")}\n`);
+  process.stdout.write(`  ${dim("→")} nexus serve            ${dim("(start the local MCP server)")}\n`);
+  process.stdout.write(
+    `  ${dim("→")} install Claude Code or set OPENROUTER_API_KEY, then re-connect for Iris.\n`
+  );
 }
 
 async function loadSheet(target: string, table?: string): Promise<SheetLoad> {

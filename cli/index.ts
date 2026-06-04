@@ -5,6 +5,7 @@
  */
 
 import { Command } from "commander";
+import { version as pkgVersion } from "../package.json";
 import { runConnect } from "./commands/connect";
 import {
   runConfigGet,
@@ -24,7 +25,7 @@ const program = new Command();
 program
   .name("nexus")
   .description("Nexus: local-first agent layer for tabular data.")
-  .version("0.2.0-alpha");
+  .version(pkgVersion);
 
 program
   .command("connect <path-or-url>")
@@ -32,8 +33,19 @@ program
   .option("--table <name>", "SQLite source: pick a specific table")
   .option("--source <id>", "Force a specific source id (mostly for tests)")
   .option("--skip-iris", "Skip the LLM read; just register the source")
+  .option(
+    "--sampler <backend>",
+    "Iris backend: local | claude-code | openrouter (auto-detected if omitted)"
+  )
   .action(async (target: string, opts) => {
     try {
+      const sampler = opts.sampler as string | undefined;
+      if (sampler && !["local", "claude-code", "openrouter"].includes(sampler)) {
+        process.stderr.write(
+          `nexus connect: --sampler must be one of: local, claude-code, openrouter\n`
+        );
+        process.exit(1);
+      }
       await runConnect(target, opts);
     } catch (err) {
       process.stderr.write(`nexus connect: ${(err as Error).message}\n`);

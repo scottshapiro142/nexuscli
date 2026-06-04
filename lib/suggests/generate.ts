@@ -6,41 +6,30 @@
  * least one triage if a meaningful predicate exists.
  */
 
-import OpenAI from "openai";
 import type { ParsedSheet } from "@/lib/sheets/fetch-csv";
 import type { ColumnSummary } from "@/lib/sheets/infer-columns";
 import type { StructuralSummary } from "@/lib/sheets/summarize";
-import { requireOpenRouterKey } from "@/lib/kernel/config";
+import type { Sampler } from "@/lib/iris/sampler";
 import { AppSpecSchema, type AppSpec } from "@/lib/spec/types";
 import type { Tell } from "@/lib/tells/types";
 
-const DEFAULT_MODEL = "anthropic/claude-sonnet-4.5";
-
-export async function generateSuggests(args: {
-  sheet: ParsedSheet;
-  summary: StructuralSummary;
-  columns: ColumnSummary[];
-  tells: Tell[];
-}): Promise<AppSpec[]> {
-  const apiKey = requireOpenRouterKey();
-
-  const client = new OpenAI({
-    apiKey,
-    baseURL: "https://openrouter.ai/api/v1",
-    defaultHeaders: { "HTTP-Referer": "https://nexus.local", "X-Title": "Nexus" },
-  });
+export async function generateSuggests(
+  args: {
+    sheet: ParsedSheet;
+    summary: StructuralSummary;
+    columns: ColumnSummary[];
+    tells: Tell[];
+  },
+  sampler: Sampler
+): Promise<AppSpec[]> {
+  if (!sampler.canSample) {
+    throw new Error(
+      "generateSuggests called with a non-sampling backend. Guard with sampler.canSample at the caller."
+    );
+  }
 
   const prompt = buildSuggestsPrompt(args);
-  const model = process.env.NEXUS_MODEL ?? DEFAULT_MODEL;
-
-  const response = await client.chat.completions.create({
-    model,
-    max_tokens: 3500,
-    response_format: { type: "json_object" },
-    messages: [{ role: "user", content: prompt }],
-  });
-
-  const raw = response.choices[0]?.message?.content?.trim() ?? "";
+  const raw = await sampler.complete({ prompt, maxTokens: 3500, jsonObject: true });
   if (!raw) throw new Error("Iris returned no suggests.");
 
   let json: unknown;

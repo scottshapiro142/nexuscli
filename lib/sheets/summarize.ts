@@ -4,19 +4,15 @@
  * Given a parsed sheet and its inferred columns, ask the model to describe what
  * the sheet appears to be and what work it suggests.
  *
- * This is the seed of the semantic layer. In week 2 the structured part of the
- * output will be cached in Neon and reused; in session 1 we only need the prose.
- *
- * Routed through OpenRouter (OpenAI-compatible API). Model is overridable via
- * NEXUS_MODEL so we can swap providers without touching code.
+ * Backend-agnostic: the caller passes a Sampler. Today there are three —
+ * openrouter, claude-code (shells out to `claude -p`), and local (no-op).
+ * Callers should check `sampler.canSample` before calling this; we don't
+ * silently no-op here because an empty summary downstream would be confusing.
  */
 
-import OpenAI from "openai";
 import type { ParsedSheet } from "./fetch-csv";
 import type { ColumnSummary } from "./infer-columns";
-import { requireOpenRouterKey } from "../kernel/config";
-
-const DEFAULT_MODEL = "anthropic/claude-sonnet-4.5";
+import type { Sampler } from "@/lib/iris/sampler";
 
 export type StructuralSummary = {
   description: string;
@@ -26,20 +22,14 @@ export type StructuralSummary = {
 
 export async function generateStructuralSummary(
   sheet: ParsedSheet,
-  columns: ColumnSummary[]
+  columns: ColumnSummary[],
+  sampler: Sampler
 ): Promise<StructuralSummary> {
-  const apiKey = requireOpenRouterKey();
-
-  const client = new OpenAI({
-    apiKey,
-    baseURL: "https://openrouter.ai/api/v1",
-    defaultHeaders: {
-      "HTTP-Referer": "https://nexus.local",
-      "X-Title": "Nexus",
-    },
-  });
-
-  const model = process.env.NEXUS_MODEL ?? DEFAULT_MODEL;
+  if (!sampler.canSample) {
+    throw new Error(
+      "generateStructuralSummary called with a non-sampling backend. Guard with sampler.canSample at the caller."
+    );
+  }
 
   const compactColumns = columns.map((c) => ({
     name: c.name,
@@ -79,13 +69,7 @@ Rules:
 - Be specific to this sheet's actual columns and data, not generic.
 - Never use em dashes.`;
 
-  const response = await client.chat.completions.create({
-    model,
-    max_tokens: 800,
-    messages: [{ role: "user", content: prompt }],
-  });
-
-  const text = response.choices[0]?.message?.content?.trim() ?? "";
+  const text = await sampler.complete({ prompt, maxTokens: 800, jsonObject: true });
   if (!text) {
     throw new Error("Model returned an empty response.");
   }
